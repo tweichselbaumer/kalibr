@@ -234,6 +234,10 @@ def main():
     reportFile = "report-imucam-" + bagtag + ".pdf"
     util.generateReport(iCal, filename=reportFile, showOnScreen=not parsed.dontShowReport)
     print "  Report written to {0}".format(reportFile)
+
+    print "Export results..."    
+    reportFile = "data-imucam-" + bagtag + ".*.csv"
+    util.exportPlotData(iCal, filename=reportFile)
     print
     
 if __name__ == "__main__":

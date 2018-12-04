@@ -92,8 +92,14 @@ def printBaselines(self):
             print "Baseline (cam{0} to cam{1}): [m] {2}".format(camNr, camNr+1, isFixed)
             print T.T()
             print baseline, "[m]"
+
+def exportPlotData(cself, filename="data.*.csv"):
+    for iidx, imu in enumerate(cself.ImuList):
+        data = np.array([re.error() for re in  cself.ImuList[iidx].gyroErrors])
+        np.savetxt(filename.replace("*", "gyroError"+str(iidx)), data, delimiter=",")
+        print "  Results written to {0}".format(filename.replace("*", "gyroError"+str(iidx)))
+        
     
-   
 def generateReport(cself, filename="report.pdf", showOnScreen=True):  
     figs = list()
     plotter = PlotCollection.PlotCollection("Calibration report")

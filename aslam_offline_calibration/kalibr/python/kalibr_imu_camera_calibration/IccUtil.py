@@ -99,6 +99,62 @@ def exportPlotData(cself, filename="data.*.csv"):
         np.savetxt(filename.replace("*", "gyroError"+str(iidx)), data, delimiter=",")
         print "  Results written to {0}".format(filename.replace("*", "gyroError"+str(iidx)))
         
+        data = np.array([re.error() for re in  cself.ImuList[iidx].accelErrors])
+        np.savetxt(filename.replace("*", "accelErrors"+str(iidx)), data, delimiter=",")
+        print "  Results written to {0}".format(filename.replace("*", "accelErrors"+str(iidx)))
+        
+        imu = cself.ImuList[iidx]
+        bias = imu.accelBiasDv.spline()
+        times = np.array([im.stamp.toSec() for im in imu.imuData if im.stamp.toSec() > bias.t_min() and im.stamp.toSec() < bias.t_max() ])
+        acc_bias_spline = np.array([bias.evalD(t,0) for t in times]).T
+        times = times - times[0]
+        np.savetxt(filename.replace("*", "acc_bias_spline"+str(iidx)), acc_bias_spline, delimiter=",")
+        print "  Results written to {0}".format(filename.replace("*", "acc_bias_spline"+str(iidx)))
+        np.savetxt(filename.replace("*", "acc_bias_spline_time"+str(iidx)), times, delimiter=",")
+        print "  Results written to {0}".format(filename.replace("*", "acc_bias_spline_time"+str(iidx)))
+        
+        imu = cself.ImuList[iidx]
+        bias = imu.gyroBiasDv.spline()
+        times = np.array([im.stamp.toSec() for im in imu.imuData if im.stamp.toSec() > bias.t_min() and im.stamp.toSec() < bias.t_max() ])
+        gyro_bias_spline = np.array([bias.evalD(t,0) for t in times]).T
+        times = times - times[0]
+        np.savetxt(filename.replace("*", "gyro_bias_spline"+str(iidx)), gyro_bias_spline, delimiter=",")
+        print "  Results written to {0}".format(filename.replace("*", "gyro_bias_spline"+str(iidx)))
+        np.savetxt(filename.replace("*", "gyro_bias_spline_time"+str(iidx)), times, delimiter=",")
+        print "  Results written to {0}".format(filename.replace("*", "gyro_bias_spline_time"+str(iidx)))
+        
+        imu = cself.ImuList[iidx]
+        bodyspline = cself.poseDv.spline()   
+        times = np.array([im.stamp.toSec() + imu.timeOffset for im in imu.imuData if im.stamp.toSec() + imu.timeOffset > bodyspline.t_min() and im.stamp.toSec() + imu.timeOffset < bodyspline.t_max() ])
+        predictedAng_body =  np.array([err.getPredictedMeasurement() for err in imu.gyroErrors]).T
+        measuredAng_body =  np.array([err.getMeasurement() for err in imu.gyroErrors]).T
+        times = times - times[0]
+        np.savetxt(filename.replace("*", "predictedAng_body"+str(iidx)), predictedAng_body, delimiter=",")
+        print "  Results written to {0}".format(filename.replace("*", "predictedAng_body"+str(iidx)))
+        np.savetxt(filename.replace("*", "measuredAng_body"+str(iidx)), measuredAng_body, delimiter=",")
+        print "  Results written to {0}".format(filename.replace("*", "measuredAng_body"+str(iidx)))
+        np.savetxt(filename.replace("*", "predictedAndmeasuredAng_body_time"+str(iidx)), times, delimiter=",")
+        print "  Results written to {0}".format(filename.replace("*", "predictedAndmeasuredAng_body_time"+str(iidx)))
+        
+        imu = cself.ImuList[iidx]
+        bodyspline = cself.poseDv.spline()   
+        times = np.array([im.stamp.toSec() + imu.timeOffset for im in imu.imuData if im.stamp.toSec() + imu.timeOffset > bodyspline.t_min() and im.stamp.toSec() + imu.timeOffset < bodyspline.t_max() ])
+        predicetedAccel_body =  np.array([err.getPredictedMeasurement() for err in imu.accelErrors]).T
+        measuredAccel_imu =  np.array([err.getMeasurement() for err in imu.accelErrors]).T
+        measuredAccel_body = measuredAccel_imu
+        times = times - times[0] 
+        np.savetxt(filename.replace("*", "predicetedAccel_body"+str(iidx)), predicetedAccel_body, delimiter=",")
+        print "  Results written to {0}".format(filename.replace("*", "predictedAng_body"+str(iidx)))
+        np.savetxt(filename.replace("*", "measuredAccel_body"+str(iidx)), measuredAccel_body, delimiter=",")
+        print "  Results written to {0}".format(filename.replace("*", "measuredAng_body"+str(iidx)))
+        np.savetxt(filename.replace("*", "predictedAndmeasuredAccel_body_time"+str(iidx)), times, delimiter=",")
+        print "  Results written to {0}".format(filename.replace("*", "predictedAndmeasuredAccel_body_time"+str(iidx)))
+        
+    for cidx, cam in enumerate(cself.CameraChain.camList):
+        data = np.array([rerr.error() for reprojectionErrors in cam.allReprojectionErrors for rerr in reprojectionErrors])
+        np.savetxt(filename.replace("*", "reprojectionError"+str(cidx)), data, delimiter=",")
+        print "  Results written to {0}".format(filename.replace("*", "reprojectionError"+str(cidx)))
+        
     
 def generateReport(cself, filename="report.pdf", showOnScreen=True):  
     figs = list()
